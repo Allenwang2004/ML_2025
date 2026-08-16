@@ -6,5 +6,6 @@ hw2/test
 
 hw3/train
 hw3/test
+hw3/src 
 
 *.pth
