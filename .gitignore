@@ -6,6 +6,7 @@ hw2/test
 
 hw3/train
 hw3/test
-hw3/src 
+hw3/src/augmented
+hw3/src/balanced_data.csv
 
 *.pth
