@@ -1,1 +1,10 @@
-*.csv
+final_project/train
+final_project/test_data
+
+hw2/train
+hw2/test
+
+hw3/train
+hw3/test
+
+*.pth
