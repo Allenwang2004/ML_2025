@@ -1,4 +1,4 @@
-# Machine Learning — 113-2 (Spring 2025)
+# NYCU_ML - Machine Learning, Spring 2025
 
 Coursework repository for the graduate *Machine Learning* course. It contains three
 programming assignments and one final project, spanning the classical-to-modern arc of
@@ -24,58 +24,6 @@ formulated, what was searched, what came out, and where the result is fragile.
 Reports (`report.pdf` in each folder) contain the derivations and the original
 experiment logs; the assignment specifications are the `ML_hw*.pdf` / `ML_Final.pdf`
 files.
-
----
-
-## Repository layout
-
-```
-2025_ML/
-├── hw1/                       # Gaussian-basis regression: MLE / MAP / Bayesian
-│   ├── problem_1.py           #   maximum likelihood (pseudo-inverse)
-│   ├── problem_2.py           #   MAP / ridge-regularised least squares
-│   ├── problem_3.py           #   Bayesian linear regression (posterior mean)
-│   ├── inputs/                #   training_dataset.csv, (additional_small)testing_dataset.csv
-│   ├── outputs/               #   result_{1,2,3}.csv  (predictions | weights)
-│   └── report.pdf
-├── hw2/                       # Linear classifiers implemented in NumPy
-│   ├── problem_1.py           #   binary logistic regression (parity of the digit)
-│   ├── problem_2.py           #   multinomial (softmax) regression, 10 classes
-│   ├── loss_curve*.png        #   training / validation loss curves
-│   ├── outputs/               #   result_{1,2}.csv  (2,000 test predictions each)
-│   └── report.pdf
-├── hw3/                       # Facial expression recognition (FER-2013 style)
-│   ├── src/
-│   │   ├── data_preprocess.py #   class-count analysis + offline augmentation → balanced_data.csv
-│   │   ├── dataset.py         #   Dataset + stratified-free random 80/20 split
-│   │   ├── model.py           #   ImprovedCNN (VGG-style, 4 conv blocks + GAP head)
-│   │   ├── trainer.py         #   cost-sensitive training loop, early stopping, plots
-│   │   └── optimize.py        #   Bayesian hyper-parameter search (skopt gp_minimize)
-│   ├── predict.py             #   model.pth + test dir → output.csv
-│   ├── evaluate.py            #   output.csv + ans.csv → accuracy / report / confusion
-│   └── report.pdf
-├── final_project/             # Few-shot (10 images/class) food classification
-│   ├── train.ipynb            #   two-stage protocol: model selection → full-data refit
-│   ├── predict.ipynb          #   inference → outputs.csv
-│   ├── model_info.json        #   selected method, weights, per-method accuracies
-│   └── 機器學習期末報告.pdf     #   slide deck
-└── assets/                    # figures used by this README
-```
-
-> **Data note.** `hw2/{train,test}`, `hw3/{train,test}`, `hw3/src/augmented`,
-> `hw3/src/balanced_data.csv`, and `final_project/{train,test_data}` are listed in
-> [.gitignore](.gitignore), as are `*.pth` checkpoints — the image corpora, the ~21 k
-> generated augmentation images, and the trained weights live locally, not in the
-> repository. Every script assumes it is run from the folder shown in the commands below.
-
-### Environment
-
-| Assignment | Requirements |
-|---|---|
-| HW1 | `numpy`, `pandas`, `matplotlib` |
-| HW2 | `numpy`, `pillow`, `matplotlib`, `tqdm` |
-| HW3 | `torch`, `torchvision`, `torchsummary`, `opencv-python`, `scikit-learn`, `scikit-optimize`, `pandas`, `tqdm` |
-| Final | `torch`, `torchvision`, `open_clip_torch`, `timm`, `torchinfo`, `pillow` (notebooks install missing packages on first run) |
 
 ---
 
@@ -120,10 +68,6 @@ localised bases, $\Phi^\top\Phi$ is badly conditioned and the penalty does real 
 The Bayesian posterior mean lands between the two — the $(\alpha, \beta)$ grid is
 coarser than the $\lambda$ grid, so the gap is a search-budget artefact rather than
 evidence that MAP dominates.
-
-```bash
-cd hw1 && python problem_1.py    # writes outputs/result_1.csv and problem_1.png
-```
 
 **Caveat worth stating.** Hyper-parameters are selected against the same held-out file
 that is used to report MSE, so the reported numbers are *selection-optimistic*. A clean
@@ -173,15 +117,6 @@ no capacity left to over-fit 10,000 examples, so early stopping is unnecessary h
 report also documents an exponential learning-rate-decay experiment whose loss curve
 oscillates violently before converging around epoch 600: a useful negative result about
 schedules interacting badly with full-batch descent at $\text{lr} \approx 0.5$.
-
-```bash
-cd hw2 && python problem_1.py    # → outputs/result_1.csv, loss_curve_1.png, loss_curve1_with_val.png
-cd hw2 && python problem_2.py    # → outputs/result_2.csv, loss_curve_2.png, loss_curve2_with_val.png
-```
-
-*Cost note:* cross-validation retrains from scratch for every fold and every grid point
-(20 configurations × 5 folds × 1,000 epochs on a dense 10,000×784 matrix), which
-dominates runtime.
 
 ---
 
@@ -250,19 +185,6 @@ The residual error structure is the one every FER system shows: `fear` leaks int
 and `angry`, `neutral` into `sad`. These are genuinely overlapping in low-resolution
 frontal faces, and no amount of resampling fixes them — the honest next step is a
 higher-capacity backbone or landmark/attention supervision, not more augmentation.
-
-```bash
-cd hw3/src && python data_preprocess.py && python trainer.py
-cd hw3     && python predict.py model.pth test/ output.csv
-cd hw3     && python evaluate.py output.csv ans.csv
-```
-
-**Known rough edges.** Vertical flip is a questionable augmentation for faces (an
-upside-down face is off-manifold for the test distribution); `optimize.py` imports
-`train` from a module named `train` while the loop now lives in `trainer.py`, so the
-search script needs that import fixed before it will run; and the 80/20 split is drawn
-*after* augmentation, so augmented copies of a training face can land in validation —
-which inflates the 71.55 % figure relative to the 68 % measured on the clean test set.
 
 ---
 
@@ -336,26 +258,7 @@ resize-256 + centre-crop-224 with ImageNet normalisation.
   trustworthy estimate, and `test_data/golden.csv` (1,500 labels) is the set that should
   carry the final claim.
 
-Run [train.ipynb](final_project/train.ipynb) (expects the data at `/content/train`, i.e.
-Colab), then [predict.ipynb](final_project/predict.ipynb), which reads
-`model_info.json`, rebuilds the selected architecture, and writes `outputs.csv` sorted by
-image number.
-
 ---
-
-## Threads that run through the four assignments
-
-1. **Regularisation is the same idea in four costumes.** The Gaussian prior in HW1, the
-   L2 penalty in HW2, dropout/BatchNorm/GAP/early stopping in HW3, and freezing almost
-   all of CLIP in the final project are all statements of the same trade: constrain the
-   hypothesis space in proportion to how little data there is.
-2. **The data distribution decides the method.** HW3's gains came from class balancing
-   and cost-sensitive weights, not from a fancier network; the final project's came from
-   choosing *which* pre-trained features to import.
-3. **Model selection needs its own honest split.** HW1 selects against the reported test
-   file, HW3 splits after augmentation, and the final project selects ensemble weights on
-   60 images. Each is documented above; each is the first thing to fix if these
-   experiments were to be written up as research rather than coursework.
 
 ## References
 
